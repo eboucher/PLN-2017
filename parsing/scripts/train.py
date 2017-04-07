@@ -15,10 +15,12 @@ Options:
 from docopt import docopt
 import pickle
 
+import os
+from nltk.corpus.reader.plaintext import PlaintextCorpusReader
+
 from corpus.ancora import SimpleAncoraCorpusReader
 
 from parsing.baselines import Flat, RBranch, LBranch
-
 
 models = {
     'flat': Flat,
@@ -31,8 +33,8 @@ if __name__ == '__main__':
     opts = docopt(__doc__)
 
     print('Loading corpus...')
-    files = 'CESS-CAST-(A|AA|P)/.*\.tbf\.xml'
-    corpus = SimpleAncoraCorpusReader('ancora/ancora-2.0/', files)
+    files = '/home/esteban/nltk_data/corpora/reuters'
+    corpus = PlaintextCorpusReader(corpus_root, '.*')
 
     print('Training model...')
     model = models[opts['-m']](corpus.parsed_sents())

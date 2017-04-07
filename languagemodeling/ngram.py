@@ -2,8 +2,8 @@
 from collections import defaultdict
 
 
-class NGram(object):
-
+class NGram:
+ 
     def __init__(self, n, sents):
         """
         n -- order of the model.
@@ -18,8 +18,19 @@ class NGram(object):
                 ngram = tuple(sent[i: i + n])
                 counts[ngram] += 1
                 counts[ngram[:-1]] += 1
-
-    def prob(self, token, prev_tokens=None):
+ 
+    def count(self, tokens):
+        """Count for an n-gram or (n-1)-gram.
+ 
+        tokens -- the n-gram or (n-1)-gram tuple.
+        """
+ 
+    def cond_prob(self, token, prev_tokens=None):
+        """Conditional probability of a token.
+ 
+        token -- the token.
+        prev_tokens -- the previous n-1 tokens (optional only if n = 1).
+        """
         n = self.n
         if not prev_tokens:
             prev_tokens = []
@@ -27,3 +38,15 @@ class NGram(object):
 
         tokens = prev_tokens + [token]
         return float(self.counts[tuple(tokens)]) / self.counts[tuple(prev_tokens)]
+ 
+    def sent_prob(self, sent):
+        """Probability of a sentence. Warning: subject to underflow problems.
+ 
+        sent -- the sentence as a list of tokens.
+        """
+ 
+    def sent_log_prob(self, sent):
+        """Log-probability of a sentence.
+ 
+        sent -- the sentence as a list of tokens.
+        """
