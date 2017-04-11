@@ -12,16 +12,16 @@ Options:
 from docopt import docopt
 import pickle
 
-from nltk.corpus import gutenberg
+from nltk.corpus import brown
+from nltk.corpus.reader.plaintext import PlaintextCorpusReader
 
 from languagemodeling.ngram import NGram
-
 
 if __name__ == '__main__':
     opts = docopt(__doc__)
 
     # load the data
-    sents = gutenberg.sents('austen-emma.txt')
+    sents = brown.sents('cf04')
 
     # train the model
     n = int(opts['-n'])
