@@ -1,6 +1,8 @@
 # https://docs.python.org/3/library/collections.html
 from collections import defaultdict
 from operator import mul
+from math import log
+import sys
 
 class NGram:
  
@@ -43,7 +45,10 @@ class NGram:
         assert len(prev_tokens) == n - 1
 
         tokens = prev_tokens + [token]
-        return float(self.counts[tuple(tokens)]) / self.counts[tuple(prev_tokens)]
+        cond_prob = 0
+        if self.counts[tuple(prev_tokens)] != 0:
+            cond_prob = float(self.counts[tuple(tokens)]) / self.counts[tuple(prev_tokens)]
+        return cond_prob
 
     def sent_prob(self, sent):
         """Probability of a sentence. Warning: subject to underflow problems.
@@ -59,7 +64,7 @@ class NGram:
         if test_sent[len(test_sent)-1] != '</s>':
             test_sent.append('</s>')
 
-        for i in range(n-1, len(test_sent) - 1):
+        for i in range(n-1, len(test_sent)):
 
             token = test_sent[i]
             prev_tokens = None
@@ -79,6 +84,52 @@ class NGram:
  
         sent -- the sentence as a list of tokens.
         """
+        assert len(sent) > 0
+        n = self.n
+
+        test_sent = sent
+        for i in range(n-1):
+            test_sent.insert(i, '<s>')
+        if test_sent[len(test_sent)-1] != '</s>':
+            test_sent.append('</s>')
+
+        log2 = lambda x: log(x, 2)
+
+        sent_prob = 0
+
+        for i in range(n-1, len(test_sent)):
+
+            token = test_sent[i]
+            prev_tokens = None
+
+            if n > 1:
+                prev_tokens = test_sent[i-n+1 : i]
+            else:
+                prev_tokens = []
+
+            tokens = prev_tokens + [token]
+            cond_prob = 0
+
+            log_tks_count = float(self.counts[tuple(tokens)])
+            if log_tks_count == 0.0:
+                log_tks_count = float('-Inf')
+            else:
+                log_tks_count = log2(log_tks_count)
+
+            log_prev_tks_count = float(self.counts[tuple(prev_tokens)])
+            if log_prev_tks_count == 0.0:
+                log_prev_tks_count = float('-Inf')
+            else:
+                log_prev_tks_count = log2(log_prev_tks_count)
+
+            if log_tks_count == float('-Inf') and log_prev_tks_count == float('-Inf'):
+                cond_prob = float('-Inf')
+            else:
+                cond_prob = log_tks_count - log_prev_tks_count
+
+            sent_prob += cond_prob
+
+        return sent_prob
 
 
 class NGramGenerator:
