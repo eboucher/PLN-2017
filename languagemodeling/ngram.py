@@ -158,6 +158,18 @@ class NGramGenerator:
  
     def generate_sent(self):
         """Randomly generate a sentence."""
+        prev_tokens = ['<s>'] * (self.n-1)
+        sent = []
+        token = self.generate_token(prev_tokens)
+
+        while token != '</s>':
+            sent.append(token)
+            if self.n != 1:
+                prev_tokens.pop(0)
+                prev_tokens.append(token)
+            token = self.generate_token(prev_tokens)
+
+        return sent
  
     def generate_token(self, prev_tokens=None):
         """Randomly generate a token, given prev_tokens.
