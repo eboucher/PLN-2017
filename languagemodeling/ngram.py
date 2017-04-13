@@ -3,6 +3,7 @@ from collections import defaultdict
 from operator import mul
 from math import log
 import sys
+import random
 
 class NGram:
  
@@ -42,7 +43,7 @@ class NGram:
         n = self.n
         if not prev_tokens:
             prev_tokens = []
-        assert len(prev_tokens) == n - 1
+        assert len(prev_tokens) == n-1
 
         tokens = prev_tokens + [token]
         cond_prob = 0
@@ -138,14 +139,22 @@ class NGramGenerator:
         """
         model -- n-gram model.
         """
+        self.n = model.n
         self.probs = defaultdict(dict)
         self.sorted_probs = defaultdict(list)
 
         for tokens, count in model.counts.items():
-            if len(tokens) == model.n:
+            if len(tokens) == self.n:
                 prev_tokens = tokens[:-1]
                 token = tokens[-1]
-                self.probs[prev_tokens][token] = model.cond_prob(token, list(prev_tokens))
+                prev_tks_list = list(prev_tokens)
+                self.probs[prev_tokens][token] = model.cond_prob(token, prev_tks_list)
+
+        for prev_tokens, tokens in self.probs.items():
+            tokens_list = list(tokens.items())
+            self.sorted_probs[prev_tokens] = sorted(tokens_list,
+                                    key=lambda tok: (tok[1], tok[0]),
+                                    reverse=True)
  
     def generate_sent(self):
         """Randomly generate a sentence."""
@@ -155,6 +164,25 @@ class NGramGenerator:
  
         prev_tokens -- the previous n-1 tokens (optional only if n = 1).
         """
+        n = self.n
+        if not prev_tokens:
+            prev_tokens = []
+        assert len(prev_tokens) == n-1
+
+        tokens_probs = self.sorted_probs[tuple(prev_tokens)]
+
+        rand_prob = random.random()
+        index = 0
+        token_prob = tokens_probs[index][1]
+        generated_token = tokens_probs[index][0]
+
+        while rand_prob > token_prob:
+            index += 1
+            token_prob += tokens_probs[index][1]
+            generated_token = tokens_probs[index][0]
+
+        return generated_token
+
 
 
 class AddOneNGram:
