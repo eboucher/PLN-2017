@@ -138,6 +138,14 @@ class NGramGenerator:
         """
         model -- n-gram model.
         """
+        self.probs = defaultdict(dict)
+        self.sorted_probs = defaultdict(list)
+
+        for tokens, count in model.counts.items():
+            if len(tokens) == model.n:
+                prev_tokens = tokens[:-1]
+                token = tokens[-1]
+                self.probs[prev_tokens][token] = model.cond_prob(token, list(prev_tokens))
  
     def generate_sent(self):
         """Randomly generate a sentence."""
