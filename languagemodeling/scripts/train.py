@@ -19,17 +19,21 @@ import pickle
 from nltk.corpus import brown
 from nltk.corpus.reader.plaintext import PlaintextCorpusReader
 
-from languagemodeling.ngram import NGram
+from languagemodeling.ngram import NGram, NGramGenerator, AddOneNGram
 
 if __name__ == '__main__':
     opts = docopt(__doc__)
 
     # load the data
-    sents = brown.sents('cf04')
+    sents = brown.sents(brown.fileids().remove('cf04'))
 
     # train the model
     n = int(opts['-n'])
-    model = NGram(n, sents)
+
+    if m == "addone":
+        model = AddOneNGram(n, sents)
+    else:
+        model = NGram(n, sents)
 
     # save it
     filename = opts['-o']
