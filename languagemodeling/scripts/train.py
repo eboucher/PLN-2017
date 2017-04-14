@@ -1,11 +1,15 @@
-"""Train an n-gram model.
+"""
+Train an n-gram model.
 
 Usage:
-  train.py -n <n> -o <file>
+  train.py -n <n> [-m <model>] -o <file>
   train.py -h | --help
 
 Options:
   -n <n>        Order of the model.
+  -m <model>    Model to use [default: ngram]:
+                  ngram: Unsmoothed n-grams.
+                  addone: N-grams with add-one smoothing.
   -o <file>     Output model file.
   -h --help     Show this screen.
 """
