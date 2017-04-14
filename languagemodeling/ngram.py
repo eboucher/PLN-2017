@@ -15,9 +15,12 @@ class NGram:
         assert n > 0
         self.n = n
         self.counts = counts = defaultdict(int)
+        
+        words = list()
 
         tokens = sents
         for sent in tokens:
+            words += sent
             for i in range(n-1):
                 sent.insert(i, '<s>')
             if sent[len(sent)-1] != '</s>':
@@ -26,7 +29,10 @@ class NGram:
                 ngram = tuple(sent[i: i + n])
                 self.counts[ngram] += 1
                 self.counts[ngram[:-1]] += 1
- 
+        words.append('</s>')
+
+        self.vocab = set(words)
+
     def count(self, tokens):
         """Count for an n-gram or (n-1)-gram.
  
@@ -199,10 +205,30 @@ class NGramGenerator:
 
 class AddOneNGram:
  
-    """
-       Todos los métodos de NGram.
-    """
+    def __init__(self, n, sents):
+        """
+        n -- order of the model.
+        sents -- list of sentences, each one being a list of tokens.
+        """
+        NGram.__init__(self, n, sents)
  
+    def cond_prob(self, token, prev_tokens=None):
+        """Conditional probability of a token.
+ 
+        token -- the token.
+        prev_tokens -- the previous n-1 tokens (optional only if n = 1).
+        """
+        n = self.n
+        if not prev_tokens:
+            prev_tokens = []
+        assert len(prev_tokens) == n-1
+
+        tokens = prev_tokens + [token]
+        prob = float(self.counts[tuple(tokens)] + 1) /\
+                          (self.counts[tuple(prev_tokens)] + len(self.vocab))
+        return prob
+
     def V(self):
         """Size of the vocabulary.
         """
+        return len(self.vocab)
